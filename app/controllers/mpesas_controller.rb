@@ -5,7 +5,7 @@ class MpesasController < ApplicationController
     # stkpush
     # This method is used to initiate a payment request to the customer's phone
     # Route: /pay
-     def stkpush
+    def stkpush
         phoneNumber = params[:phoneNumber]
         amount = params[:amount]
         url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
@@ -13,50 +13,53 @@ class MpesasController < ApplicationController
         business_short_code = ENV["MPESA_SHORTCODE"]
         password = Base64.strict_encode64("#{business_short_code}#{ENV["MPESA_PASSKEY"]}#{timestamp}")
         payload = {
-        'BusinessShortCode': business_short_code,
-        'Password': password,
-        'Timestamp': timestamp,
-        'TransactionType': "CustomerPayBillOnline",
-        'Amount': amount,
-        'PartyA': phoneNumber,
-        'PartyB': business_short_code,
-        'PhoneNumber': phoneNumber,
-        'CallBackURL': "#{ENV["CALLBACK_URL"]}",
-        'AccountReference': 'Codearn',
-        'TransactionDesc': "Payment for Codearn premium"
+          'BusinessShortCode': business_short_code,
+          'Password': password,
+          'Timestamp': timestamp,
+          'TransactionType': "CustomerPayBillOnline",
+          'Amount': amount,
+          'PartyA': phoneNumber,
+          'PartyB': business_short_code,
+          'PhoneNumber': phoneNumber,
+          'CallBackURL': "#{ENV["CALLBACK_URL"]}",
+          'AccountReference': 'Codearn',
+          'TransactionDesc': "Payment for Codearn premium"
         }.to_json
-
+      
         headers = {
-        Content_type: 'application/json',
-        Authorization: "Bearer #{get_access_token}"
+          Content_type: 'application/json',
+          Authorization: "Bearer #{get_access_token}"
         }
-
-
+      
         response = RestClient::Request.new({
-        method: :post,
-        url: url,
-        payload: payload,
-        headers: headers
+          method: :post,
+          url: url,
+          payload: payload,
+          headers: headers
         }).execute do |response, request|
-        case response.code
-        when 500
-        [ :error, JSON.parse(response.to_str) ]
-        print response
-        when 401
-        [ :error, JSON.parse(response.to_str) ]
-        print response
-        when 400
-        [ :error, JSON.parse(response.to_str) ]
-        print response
-        when 200
-        [ :success, JSON.parse(response.to_str) ]
-        print response
-        else
-        fail "Invalid response #{response.to_str} received."
+          case response.code
+          when 500, 401, 400
+            render json: { error: JSON.parse(response.to_str) }
+            return
+          when 200
+            # Save transaction details to the database
+            transaction_details = JSON.parse(response.to_str)
+            mpesa = Mpesa.create!(
+              phoneNumber: phoneNumber,
+              amount: amount,
+              checkoutRequestID: transaction_details['CheckoutRequestID'],
+              merchantRequestID: transaction_details['MerchantRequestID'],
+              mpesaReceiptNumber: transaction_details['MpesaReceiptNumber']
+            )
+            render json: { success: true, mpesa: mpesa }
+            return
+          else
+            render json: { error: "Invalid response #{response.to_str} received." }
+            return
+          end
         end
-        end
-        render json: response
-    end
+      end
+      
 
     # stkquery
     # This method is used to query the status of a payment request
