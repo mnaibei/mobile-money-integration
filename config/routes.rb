@@ -7,4 +7,6 @@ Rails.application.routes.draw do
   post 'pay', to: 'mpesas#stkpush'
   post 'payment_query', to: 'mpesas#stkquery'
   post 'b2c', to: 'mpesas#b2c'
+  post '/callback', to: 'mpesas#mpesa_callback'
+
 end

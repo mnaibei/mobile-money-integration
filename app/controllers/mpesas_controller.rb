@@ -59,7 +59,7 @@ class MpesasController < ApplicationController
           end
         end
       end
-      
+
 
     # stkquery
     # This method is used to query the status of a payment request
@@ -102,6 +102,42 @@ class MpesasController < ApplicationController
         end
         render json: response
     end
+
+      # Endpoint to handle Mpesa's callback notifications
+      def mpesa_callback
+        begin
+          # Parse the notification data
+          notification_data = JSON.parse(request.body.read)
+          puts "Notification Data: #{notification_data}"
+        rescue JSON::ParserError => e
+          # If JSON parsing fails, respond with an error status
+          render json: { error: 'Failed to parse JSON data' }, status: :bad_request
+          return
+        end
+    
+        # Extract relevant information from the notification data
+        checkout_request_id = notification_data['mpesa']['checkoutRequestID'] # Use the correct key to access checkoutRequestID
+    
+        # Find the corresponding transaction record in your database based on checkoutRequestID
+        mpesa_transaction = Mpesa.find_by(checkoutRequestID: checkout_request_id)
+    
+        if mpesa_transaction
+          # Update the transaction record based on the result code
+          result_code = notification_data['success'] ? '0' : '1' # Assuming 'success' indicates success or failure
+          case result_code
+          when '0' # Success
+            mpesa_transaction.update(status: 'completed')
+          else
+            mpesa_transaction.update(status: 'failed')
+          end
+    
+          # Respond with a success status
+          render json: { success: true }
+        else
+          # If transaction not found, respond with an error status
+          render json: { error: 'Transaction not found' }, status: :not_found
+        end
+      end
 
     # b2c
     # This method is used to pay out to a phone number
@@ -174,6 +210,7 @@ class MpesasController < ApplicationController
             res = generate_access_token_request()
             attempts += 1
         end
+        puts "Attempts: #{attempts}"
         if res.code != 200
             raise MpesaError('Unable to generate access token')
         end
