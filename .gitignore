@@ -27,4 +27,6 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
-.env
+
+# Ignore local environment configuration.
+/config/local_env.yml
