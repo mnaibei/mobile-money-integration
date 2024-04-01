@@ -43,6 +43,7 @@ class CallbacksController < ApplicationController
   end
 
   # Endpoint to handle Mpesa's callback notifications
+  # Updates db column with state of transaction(success/fail)
   def mpesa_callback
     begin
       # Parse the notification data
