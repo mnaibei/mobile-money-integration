@@ -63,7 +63,7 @@ Params:
         "mpesaReceiptNumber": null,
         "created_at": "2024-04-01T13:45:34.947Z",
         "updated_at": "2024-04-01T13:45:34.947Z",
-        "status": null
+        "status": "pending"
     }
 }
 ```

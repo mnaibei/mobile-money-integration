@@ -6,25 +6,25 @@ info:
 paths:
   "/b2c":
     post:
-      summary: b2c_transaction
+      summary: This endpoint is used to initiate a business-to-customer (B2C) transaction. A B2C transaction is a payment made by a business to an individual customer.
       responses:
         "200":
           description: successful
   "/payment_query":
     post:
-      summary: stkquery callback
+      summary: This endpoint is used to query the status of a payment request. It's used to check if a payment has been processed successfully.
       responses:
         "200":
           description: successful
   "/callback":
     post:
-      summary: mpesa_callback callback
+      summary: This endpoint is used by the Mpesa service to send callback notifications about the status of transactions. Your application would listen for POST requests to this endpoint and handle them accordingly.
       responses:
         "200":
           description: successful
   "/pay":
     post:
-      summary: stkpush mpesa
+      summary: This endpoint is used to initiate a payment request via Mpesa's STK Push service. STK Push is a service that prompts a user's phone with a popup to enter their Mpesa PIN to complete a payment.
       responses:
         "200":
           description: successful
