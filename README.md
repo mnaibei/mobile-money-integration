@@ -36,6 +36,11 @@ This project demonstrates the integration of Mpesa API with a Ruby on Rails appl
    rails s
    ```
 
+5. Go to this link to view api docs:
+   ```http
+   https://example.com/api-docs
+   ```
+
 ## Usage
 
 ### stkpush
@@ -47,6 +52,20 @@ POST /pay
 Params:
 - phoneNumber: "Customer's phone number"
 - amount: "Amount to be paid"
+- Example response = {
+    "success": true,
+    "mpesa": {
+        "id": 5,
+        "phoneNumber": "",
+        "amount": "1",
+        "checkoutRequestID": "ws_CO_01042024164530692708374149",
+        "merchantRequestID": "6e86-45dd-91ac-fd5d4178ab521642874",
+        "mpesaReceiptNumber": null,
+        "created_at": "2024-04-01T13:45:34.947Z",
+        "updated_at": "2024-04-01T13:45:34.947Z",
+        "status": "pending"
+    }
+}
 ```
 
 ### stkquery
@@ -57,6 +76,32 @@ Query the status of a payment request.
 POST /payment_query
 Params:
 - checkoutRequestID: "ID of the payment request to query"
+```
+
+### callback
+
+Queries status of a payment request but also updates the db status from pending to successful if payment was successful.
+
+```ruby
+POST /callback
+Params:
+- You can send the whole response object from /pay or /b2c and it will be processed.
+- Example response object from /b2c
+{
+    "success": true,
+    "b2c_transaction": {
+        "id": 8,
+        "transaction_id": "AG_20240401_201055e76349a83f60b8",
+        "conversation_id": "962d9a78-0c73-4187-9491-e1a1b6cc7f15",
+        "response_code": "0",
+        "response_description": "Accept the service request successfully.",
+        "status": "pending",
+        "created_at": "2024-04-01T13:34:47.201Z",
+        "updated_at": "2024-04-01T13:34:47.201Z",
+        "phoneNumber": "",
+        "amount": "100"
+    }
+}
 ```
 
 ### b2c

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_03_24_094755) do
+ActiveRecord::Schema[7.0].define(version: 2024_04_01_144045) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -37,10 +37,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_24_094755) do
     t.string "amount"
     t.string "checkoutRequestID"
     t.string "merchantRequestID"
-    t.string "mpesaReceiptNumber"
+    t.string "mpesaReceiptNumber", default: "placeholder"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "status"
+    t.string "status", default: "pending"
   end
 
 end
